@@ -1,16 +1,24 @@
-"""Функции сохранения и загрузки данных проекта в JSON-файлах."""
+"""Функции сохранения и загрузки объектов проекта в JSON-файлах.
+
+Использование классов не отменяет хранение данных в JSON: при загрузке
+данные из файла преобразуются в объекты Project, Role, Candidate и
+Application, а перед сохранением объекты преобразуются обратно в
+структуры JSON.
+"""
 
 import json
+from typing import List
+
+from models import Application, Candidate, Project, Role
+from models.candidates import find_candidate_by_id
+from models.projects import find_project_by_id
 
 
-def load_projects(filename: str) -> dict[int, dict]:
-    """Загрузить проекты из JSON-файла.
-
-    Файл хранит список проектов; функция преобразует его в словарь,
-    ключом которого является идентификатор проекта.
+def load_projects(filename: str) -> List[Project]:
+    """Загрузить проекты из JSON-файла и создать объекты Project.
 
     :param filename: путь к JSON-файлу с проектами
-    :return: словарь проектов; пустой словарь, если файл отсутствует
+    :return: список объектов Project; пустой список, если файл отсутствует
         или повреждён
     """
     try:
@@ -18,36 +26,46 @@ def load_projects(filename: str) -> dict[int, dict]:
             raw_projects = json.load(file)
     except FileNotFoundError:
         print(f"Файл {filename} не найден, будет создан новый список проектов")
-        return {}
+        return []
     except json.JSONDecodeError:
         print(f"Файл {filename} повреждён, данные проектов не загружены")
-        return {}
+        return []
 
-    return {
-        project["id"]: {"name": project["name"], "roles": project["roles"]}
-        for project in raw_projects
-    }
+    projects: List[Project] = []
+    for item in raw_projects:
+        project = Project(item["id"], item["name"])
+        project.roles = [
+            Role(role["id"], role["name"]) for role in item["roles"]
+        ]
+        projects.append(project)
+    return projects
 
 
-def save_projects(filename: str, projects: dict[int, dict]) -> None:
-    """Сохранить проекты в JSON-файл.
+def save_projects(filename: str, projects: List[Project]) -> None:
+    """Сохранить объекты Project в JSON-файл.
 
     :param filename: путь к JSON-файлу с проектами
-    :param projects: словарь проектов
+    :param projects: список объектов Project
     """
     raw_projects = [
-        {"id": project_id, "name": data["name"], "roles": data["roles"]}
-        for project_id, data in projects.items()
+        {
+            "id": project.id,
+            "name": project.name,
+            "roles": [
+                {"id": role.id, "name": role.name} for role in project.roles
+            ],
+        }
+        for project in projects
     ]
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(raw_projects, file, ensure_ascii=False, indent=2)
 
 
-def load_candidates(filename: str) -> dict[int, dict]:
-    """Загрузить кандидатов из JSON-файла.
+def load_candidates(filename: str) -> List[Candidate]:
+    """Загрузить кандидатов из JSON-файла и создать объекты Candidate.
 
     :param filename: путь к JSON-файлу с кандидатами
-    :return: словарь кандидатов; пустой словарь, если файл отсутствует
+    :return: список объектов Candidate; пустой список, если файл отсутствует
         или повреждён
     """
     try:
@@ -55,41 +73,46 @@ def load_candidates(filename: str) -> dict[int, dict]:
             raw_candidates = json.load(file)
     except FileNotFoundError:
         print(f"Файл {filename} не найден, будет создан новый список кандидатов")
-        return {}
+        return []
     except json.JSONDecodeError:
         print(f"Файл {filename} повреждён, данные кандидатов не загружены")
-        return {}
+        return []
 
-    return {
-        candidate["id"]: {"name": candidate["name"], "contact": candidate["contact"]}
-        for candidate in raw_candidates
-    }
+    return [Candidate.from_data(item) for item in raw_candidates]
 
 
-def save_candidates(filename: str, candidates: dict[int, dict]) -> None:
-    """Сохранить кандидатов в JSON-файл.
+def save_candidates(filename: str, candidates: List[Candidate]) -> None:
+    """Сохранить объекты Candidate в JSON-файл.
 
     :param filename: путь к JSON-файлу с кандидатами
-    :param candidates: словарь кандидатов
+    :param candidates: список объектов Candidate
     """
     raw_candidates = [
-        {"id": candidate_id, "name": data["name"], "contact": data["contact"]}
-        for candidate_id, data in candidates.items()
+        {"id": candidate.id, "name": candidate.name, "contact": candidate.contact}
+        for candidate in candidates
     ]
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(raw_candidates, file, ensure_ascii=False, indent=2)
 
 
-def load_applications(filename: str) -> list[dict]:
-    """Загрузить заявки из JSON-файла.
+def load_applications(
+    filename: str,
+    projects: List[Project],
+    candidates: List[Candidate],
+) -> List[Application]:
+    """Загрузить заявки из JSON-файла, связав их с проектами и кандидатами.
+
+    Заявка, для которой не найден проект, роль или кандидат, пропускается:
+    такая заявка не может быть корректно восстановлена как объект.
 
     :param filename: путь к JSON-файлу с заявками
-    :return: список заявок; пустой список, если файл отсутствует
-        или повреждён
+    :param projects: список уже загруженных объектов Project
+    :param candidates: список уже загруженных объектов Candidate
+    :return: список объектов Application
     """
     try:
         with open(filename, "r", encoding="utf-8") as file:
-            return json.load(file)
+            raw_applications = json.load(file)
     except FileNotFoundError:
         print(f"Файл {filename} не найден, будет создан новый список заявок")
         return []
@@ -97,12 +120,42 @@ def load_applications(filename: str) -> list[dict]:
         print(f"Файл {filename} повреждён, данные заявок не загружены")
         return []
 
+    applications: List[Application] = []
+    for item in raw_applications:
+        project = find_project_by_id(projects, item["project_id"])
+        candidate = find_candidate_by_id(candidates, item["candidate_id"])
+        if project is None or candidate is None:
+            continue
 
-def save_applications(filename: str, applications: list[dict]) -> None:
-    """Сохранить заявки в JSON-файл.
+        role = project.find_role(item["role_id"])
+        if role is None:
+            continue
+
+        application = Application(
+            item["id"], candidate, project, role, item["status"]
+        )
+        applications.append(application)
+    return applications
+
+
+def save_applications(filename: str, applications: List[Application]) -> None:
+    """Сохранить объекты Application в JSON-файл.
+
+    Ссылки на объекты Project и Candidate преобразуются в их
+    идентификаторы (project_id, role_id, candidate_id).
 
     :param filename: путь к JSON-файлу с заявками
-    :param applications: список заявок
+    :param applications: список объектов Application
     """
+    raw_applications = [
+        {
+            "id": application.id,
+            "project_id": application.project.id,
+            "role_id": application.role.id,
+            "candidate_id": application.candidate.id,
+            "status": application.status,
+        }
+        for application in applications
+    ]
     with open(filename, "w", encoding="utf-8") as file:
-        json.dump(applications, file, ensure_ascii=False, indent=2)
+        json.dump(raw_applications, file, ensure_ascii=False, indent=2)
