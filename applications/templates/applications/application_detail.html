@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if application %}
+        Заявка №{{ application.id }} - Casting Service
+    {% else %}
+        Заявка не найдена - Casting Service
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if application %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">
+                    Заявка №{{ application.id }}
+                </h1>
+
+                <p class="card-text">
+                    <strong>Кандидат:</strong>
+                    {{ application.candidate.name }}
+                    ({{ application.candidate.contact }})
+                </p>
+
+                <p class="card-text">
+                    <strong>Проект:</strong>
+                    {{ application.project.name }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Роль:</strong>
+                    {{ application.role.name }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Статус:</strong>
+                    {% include "applications/includes/application_status.html" %}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">Заявка не найдена</h1>
+        <p>Заявка с указанным идентификатором отсутствует.</p>
+    {% endif %}
+
+    <a
+        href="{% url 'applications:list' %}"
+        class="btn btn-outline-secondary mt-3"
+    >
+        ← к списку заявок
+    </a>
+{% endblock %}

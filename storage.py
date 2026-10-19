@@ -34,7 +34,9 @@ def load_projects(filename: str) -> List[Project]:
     projects: List[Project] = []
     for item in raw_projects:
         project = Project(item["id"], item["name"])
-        project.roles = [Role(role["id"], role["name"]) for role in item["roles"]]
+        project.roles = [
+            Role(role["id"], role["name"]) for role in item["roles"]
+        ]
         projects.append(project)
     return projects
 
@@ -49,7 +51,9 @@ def save_projects(filename: str, projects: List[Project]) -> None:
         {
             "id": project.id,
             "name": project.name,
-            "roles": [{"id": role.id, "name": role.name} for role in project.roles],
+            "roles": [
+                {"id": role.id, "name": role.name} for role in project.roles
+            ],
         }
         for project in projects
     ]
@@ -127,7 +131,9 @@ def load_applications(
         if role is None:
             continue
 
-        application = Application(item["id"], candidate, project, role, item["status"])
+        application = Application(
+            item["id"], candidate, project, role, item["status"]
+        )
         applications.append(application)
     return applications
 

@@ -22,7 +22,9 @@ class Candidate:
         return f"{self.name} ({self.contact})"
 
 
-def add_candidate(candidates: List[Candidate], name: str, contact: str) -> Candidate:
+def add_candidate(
+    candidates: List[Candidate], name: str, contact: str
+) -> Candidate:
     """Создать кандидата, добавить его в коллекцию и вернуть созданный объект."""
     candidate_id = max((candidate.id for candidate in candidates), default=0) + 1
     candidate = Candidate(candidate_id, name, contact)
@@ -43,4 +45,6 @@ def find_candidate_by_id(
 def find_candidate(candidates: List[Candidate], query: str) -> List[Candidate]:
     """Найти кандидатов, в имени которых встречается подстрока query."""
     query = query.lower()
-    return [candidate for candidate in candidates if query in candidate.name.lower()]
+    return [
+        candidate for candidate in candidates if query in candidate.name.lower()
+    ]

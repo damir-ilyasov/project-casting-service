@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Проекты - Casting Service
+{% endblock %}
+
+{% block content %}
+    <h1>Проекты</h1>
+
+    <p>Всего проектов: {{ projects|length }}</p>
+
+    {% for project in projects %}
+        {% include "projects/includes/project_card.html" %}
+    {% empty %}
+        <p>Проектов пока нет.</p>
+    {% endfor %}
+{% endblock %}

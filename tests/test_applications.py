@@ -1,12 +1,8 @@
 import pytest
 
 from models import Candidate, Project
-from models.applications import (
-    cancel_application,
-    create_application,
-    find_application_by_id,
-    is_role_available,
-)
+from models.applications import cancel_application, create_application, is_role_available
+from models.applications import find_application_by_id
 
 
 def _make_project_and_role():

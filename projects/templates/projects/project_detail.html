@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if project %}
+        {{ project.name }} - Casting Service
+    {% else %}
+        Проект не найден - Casting Service
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if project %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">{{ project.name }}</h1>
+
+                <p class="card-text"><strong>ID:</strong> {{ project.id }}</p>
+
+                <p class="card-text"><strong>Роли:</strong></p>
+                <ul class="list-group mb-3">
+                    {% for item in roles_with_status %}
+                        <li class="list-group-item role-item">
+                            {{ item.role.name }}
+                            {% if item.available %}
+                                <span class="badge bg-success application-status">
+                                    свободна
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger application-status">
+                                    занята
+                                </span>
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item">
+                            В этом проекте пока нет ролей.
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">Проект не найден</h1>
+        <p>Проект с указанным идентификатором отсутствует.</p>
+    {% endif %}
+
+    <a
+        href="{% url 'projects:list' %}"
+        class="btn btn-outline-secondary mt-3"
+    >
+        ← к списку проектов
+    </a>
+{% endblock %}

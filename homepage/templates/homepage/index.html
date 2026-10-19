@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Главная - Casting Service
+{% endblock %}
+
+{% block content %}
+    <h1 class="display-4">Casting Service</h1>
+
+    <p class="lead">
+        Сервис организации и проведения кастингов.
+    </p>
+
+    <p>
+        Casting Service помогает организаторам создавать проекты
+        (фильмы, сериалы, рекламные кампании), открывать роли для
+        подбора кандидатов и фиксировать результаты заявок, а
+        кандидатам — находить подходящие роли и подавать заявки на
+        участие в кастинге.
+    </p>
+
+    <p>Основные разделы:</p>
+    <a href="{% url 'projects:list' %}" class="btn btn-primary me-2">
+        Проекты
+    </a>
+    <a href="{% url 'applications:list' %}" class="btn btn-secondary">
+        Заявки
+    </a>
+{% endblock %}

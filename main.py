@@ -1,9 +1,10 @@
-"""Точка входа приложения «Сервис проведения кастингов» (объектная модель ПР3).
+"""Точка входа приложения «Сервис проведения кастингов» (консольная версия).
 
-Программа больше не хранит проекты, кандидатов и заявки в виде словарей:
-основные данные передаются в виде коллекций объектов List[Project],
-List[Candidate], List[Application]. Создание, поиск и взаимодействие
-объектов организовано через классы и функции пакета models.
+Консольная версия сохраняется неизменной с ПР3: основные данные
+передаются в виде коллекций объектов List[Project], List[Candidate],
+List[Application]. Создание, поиск и взаимодействие объектов
+организовано через классы и функции пакета models. Веб-часть проекта
+(ПР5-ПР6) использует тот же пакет models и storage.py.
 """
 
 from typing import List
@@ -79,7 +80,9 @@ def show_applications(applications: List[Application]) -> None:
         print(f"[{application.id}] {application}")
 
 
-def show_statistics(projects: List[Project], applications: List[Application]) -> None:
+def show_statistics(
+    projects: List[Project], applications: List[Application]
+) -> None:
     """Вывести статистику по проектам и заявкам.
 
     :param projects: список объектов Project

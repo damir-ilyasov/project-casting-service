@@ -99,8 +99,8 @@ def find_application_by_id(
 ) -> Optional[Application]:
     """Найти заявку по идентификатору.
 
-    Используется веб-страницей заявки (ПР5): идентификатор передаётся
-    в URL, а представление получает соответствующий объект Application.
+    Используется веб-страницей заявки: идентификатор передаётся в URL,
+    а представление получает соответствующий объект Application.
     """
     for application in applications:
         if application.id == application_id:

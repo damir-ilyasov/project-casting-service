@@ -1,0 +1,28 @@
+<article class="card project-card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">
+            <a href="{% url 'projects:detail' project.id %}">
+                {{ project.name|default:"Без названия" }}
+            </a>
+        </h5>
+
+        <p class="card-text text-muted">
+            {{ project.roles|length }} ролей
+        </p>
+
+        <ul class="list-group list-group-flush">
+            {% for role in project.roles %}
+                <li class="list-group-item">
+                    {{ role.name }}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <a
+            href="{% url 'projects:detail' project.id %}"
+            class="btn btn-primary btn-sm mt-2"
+        >
+            Подробнее
+        </a>
+    </div>
+</article>
