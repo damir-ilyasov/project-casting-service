@@ -1,50 +1,32 @@
-"""View-функции приложения projects: список проектов и страница проекта.
-
-HTML больше не формируется в Python. Представления получают данные
-(через storage.py и models/), готовят контекст и вызывают render() —
-разметку формируют шаблоны rooms/templates/projects/*.html.
-"""
+"""Представления страниц проектов, использующие SQL-запросы SQLite."""
 
 from django.shortcuts import render
 
-from models.applications import is_role_available
-from models.projects import find_project_by_id
-from storage import load_applications, load_candidates, load_projects
+from db.queries import get_project, get_projects
 
 
 def projects(request):
-    """Страница /projects/: список проектов с их ролями."""
-    projects_list = load_projects("data/projects.json")
-
+    """Список проектов; параметр q позволяет искать по названию."""
+    search = request.GET.get("q", "").strip()
     context = {
-        "projects": projects_list,
+        "projects": get_projects(search),
+        "search": search,
     }
-
     return render(request, "projects/project_list.html", context)
 
 
 def project_detail(request, project_id):
-    """Страница /projects/<id>/: информация о проекте и статус ролей."""
-    projects_list = load_projects("data/projects.json")
-    project = find_project_by_id(projects_list, project_id)
-
-    roles_with_status = []
-    if project is not None:
-        candidates_list = load_candidates("data/candidates.json")
-        applications_list = load_applications(
-            "data/applications.json",
-            projects_list,
-            candidates_list,
-        )
-        for role in project.roles:
-            available = is_role_available(applications_list, project, role)
-            roles_with_status.append({"role": role, "available": available})
+    """Страница проекта и статусы его ролей."""
+    project = get_project(project_id)
+    roles_with_status = [
+        {"role": role, "available": role.available}
+        for role in project.roles
+    ] if project is not None else []
 
     context = {
         "project": project,
         "roles_with_status": roles_with_status,
     }
-
     return render(
         request,
         "projects/project_detail.html",

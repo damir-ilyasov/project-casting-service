@@ -7,7 +7,28 @@
 {% block content %}
     <h1>Заявки</h1>
 
-    <p>Всего заявок: {{ applications|length }}</p>
+    <form method="get" class="mb-3">
+        <label for="application-status" class="form-label">Фильтр по статусу</label>
+        <div class="input-group">
+            <select id="application-status" name="status" class="form-select">
+                <option value="" {% if not selected_status %}selected{% endif %}>
+                    Все статусы
+                </option>
+                <option value="pending" {% if selected_status == "pending" %}selected{% endif %}>
+                    Ожидает
+                </option>
+                <option value="accepted" {% if selected_status == "accepted" %}selected{% endif %}>
+                    Принята
+                </option>
+                <option value="cancelled" {% if selected_status == "cancelled" %}selected{% endif %}>
+                    Отменена
+                </option>
+            </select>
+            <button class="btn btn-primary" type="submit">Применить</button>
+        </div>
+    </form>
+
+    <p>Найдено заявок: {{ applications|length }}</p>
 
     <ul class="list-group">
         {% for application in applications %}

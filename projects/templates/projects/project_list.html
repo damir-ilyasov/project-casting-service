@@ -7,7 +7,21 @@
 {% block content %}
     <h1>Проекты</h1>
 
-    <p>Всего проектов: {{ projects|length }}</p>
+    <form method="get" class="mb-3">
+        <label for="project-search" class="form-label">Поиск по названию</label>
+        <div class="input-group">
+            <input id="project-search" name="q" value="{{ search }}"
+                   class="form-control" placeholder="Например, сериал">
+            <button class="btn btn-primary" type="submit">Найти</button>
+            {% if search %}
+                <a class="btn btn-outline-secondary" href="{% url 'projects:list' %}">
+                    Сбросить
+                </a>
+            {% endif %}
+        </div>
+    </form>
+
+    <p>Найдено проектов: {{ projects|length }}</p>
 
     {% for project in projects %}
         {% include "projects/includes/project_card.html" %}
